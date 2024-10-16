@@ -1,13 +1,11 @@
 use clap::ArgMatches;
-use clap::{Arg, ArgAction, Command};
-use std::collections::HashMap;
-use std::env;
+use clap::{Arg, Command};
+use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::io::Cursor;
 use std::io::Read;
-use std::io::Write;
 
 const HELP_STRING: &str = r#"
 Usage: grep [OPTIONS] <pattern> <files...>
@@ -23,19 +21,25 @@ Options:
 
 fn main() {
     let matches = get_arguments();
-    // if let Some(files) = matches.get_many::<String>("files") {
-    //     println!("Input files:");
-    //     for file in files {
-    //         println!("  {}", file);
-    //     }
-    // }
-    // if let Some(_help) = matches.get_one::<bool>("help_id") {
-    //     println!("{}", HELP_STRING);
-    // }
-    // println!("{:?}",vect);
-    // parse_string(args);
-    // let file_content = read_file("lamin");
-    // find_string(file_content.unwrap(), input_line);
+
+    if let Some(file_patterns) = matches.get_many::<String>("files") {
+        if let Some(pattern) = matches.get_one::<String>("pattern") {
+            for file_pattern in file_patterns {
+                match fs::metadata(file_pattern) {
+                    Ok(metadata) => {
+                        if metadata.is_dir() {
+                            /* Do nothing if -r is not set */
+                        } else {
+                            find_string(read_file(file_pattern).unwrap(), pattern.to_string());
+                        }
+                    }
+                    Err(e) => println!("Error accessing {}: {}", file_pattern, e),
+                }
+            }
+        }
+    } else {
+        println!("Error, No files were given")
+    }
 }
 
 fn get_arguments() -> ArgMatches {
@@ -86,7 +90,7 @@ fn get_arguments() -> ArgMatches {
                 .required(false),
         )
         .arg(
-            Arg::new("patten")
+            Arg::new("pattern")
                 .value_name("pattern")
                 .help("A required text argument")
                 .required(true)
@@ -103,13 +107,6 @@ fn get_arguments() -> ArgMatches {
         .help_template(HELP_STRING)
         .get_matches();
     return matches;
-}
-
-fn parse_string(input: &String) -> HashMap<String, Vec<String>> {
-    let mut parsed_map = HashMap::new();
-    let splited_input: Vec<&str> = input.split(" ").collect();
-    println!("{:?}", splited_input);
-    return parsed_map;
 }
 
 fn read_file(path: &str) -> io::Result<String> {
