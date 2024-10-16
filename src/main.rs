@@ -8,21 +8,37 @@ use std::io::BufRead;
 use std::io::Cursor;
 use std::io::Read;
 use std::io::Write;
+
+const HELP_STRING: &str = r#"
+Usage: grep [OPTIONS] <pattern> <files...>
+Options:
+-i                Case-insensitive search
+-n                Print line numbers
+-v                Invert match (exclude lines that match the pattern)
+-r                Recursive directory search
+-f                Print filenames
+-c                Enable colored output
+-h, --help        Show help information
+"#;
+
 fn main() {
     let matches = get_arguments();
-    if let Some(files) = matches.get_many::<String>("files") {
-        println!("Input files:");
-        for file in files {
-            println!("  {}", file);
-        }
-    }
+    // if let Some(files) = matches.get_many::<String>("files") {
+    //     println!("Input files:");
+    //     for file in files {
+    //         println!("  {}", file);
+    //     }
+    // }
+    // if let Some(_help) = matches.get_one::<bool>("help_id") {
+    //     println!("{}", HELP_STRING);
+    // }
     // println!("{:?}",vect);
     // parse_string(args);
     // let file_content = read_file("lamin");
     // find_string(file_content.unwrap(), input_line);
 }
 
-fn get_arguments() -> ArgMatches{
+fn get_arguments() -> ArgMatches {
     let matches = Command::new("Grep App")
         .version("1.0")
         .author("Hooman Keshvari")
@@ -35,14 +51,14 @@ fn get_arguments() -> ArgMatches{
                 .required(false),
         )
         .arg(
-            Arg::new("Case-insensitive")
+            Arg::new("case-insensitive")
                 .short('i')
                 .action(clap::ArgAction::SetTrue)
                 .help("Case-insensitive search")
                 .required(false),
         )
         .arg(
-            Arg::new("Line-Number")
+            Arg::new("line-Number")
                 .short('n')
                 .action(clap::ArgAction::SetTrue)
                 .help("Print line numbers")
@@ -63,18 +79,10 @@ fn get_arguments() -> ArgMatches{
                 .required(false),
         )
         .arg(
-            Arg::new("file_names")
+            Arg::new("colored")
                 .short('c')
                 .action(clap::ArgAction::SetTrue)
                 .help("Enable colored output")
-                .required(false),
-        )
-        .arg(
-            Arg::new("help")
-                .short('h')
-                .long("help")
-                .action(clap::ArgAction::SetTrue)
-                .help("Show help information")
                 .required(false),
         )
         .arg(
@@ -92,10 +100,10 @@ fn get_arguments() -> ArgMatches{
                 .num_args(1..)
                 .index(2),
         )
+        .help_template(HELP_STRING)
         .get_matches();
     return matches;
 }
-
 
 fn parse_string(input: &String) -> HashMap<String, Vec<String>> {
     let mut parsed_map = HashMap::new();
