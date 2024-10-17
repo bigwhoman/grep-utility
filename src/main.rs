@@ -24,8 +24,12 @@ Options:
 "#;
 
 fn main() {
+    /* Parse the input arguments */
     let matches = get_arguments();
-
+    /* First of all see the files, then get the pattern and then check each files. 
+       If the search was recursive, get all the files and then also search them
+    
+    */
     if let Some(file_patterns) = matches.get_many::<String>("files") {
         if let Some(pattern) = &matches.get_one::<String>("pattern") {
             for file_pattern in file_patterns {
@@ -142,7 +146,6 @@ fn find_string(file: String, pattern: String, args: &ArgMatches) {
     for line in cursor.lines() {
         match line {
             Ok(mut content) => {
-                // println!("{}   ----- {}", content, pattern);
                 let content_array = content
                     .split(" ")
                     .map(|c| {
